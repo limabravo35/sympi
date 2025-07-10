@@ -1,1 +1,6 @@
 streamlit
+pandas
+altair
+matplotlib
+seaborn
+fpdf
