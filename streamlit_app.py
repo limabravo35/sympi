@@ -31,8 +31,10 @@ def lade_medikamente():
     else:
         return pd.DataFrame(columns=["Datum", "Kommentar"])
 
-st.session_state["daten"] = lade_daten()
-st.session_state["medikamente"] = lade_medikamente()
+if "daten" not in st.session_state:
+    st.session_state["daten"] = lade_daten()
+if "medikamente" not in st.session_state:
+    st.session_state["medikamente"] = lade_medikamente()
 
 # --- 1. Dateneingabe ---
 with st.expander("📝 Neue tägliche Bewertung"):
@@ -118,27 +120,31 @@ if not st.session_state["daten"].empty:
             color=alt.Color("Kategorie:N", scale=alt.Scale(domain=kategorien,
                                                            range=["#4CAF50", "#2196F3", "#F44336"]))
         ).properties(
-            width=700,
+            width="container",
             height=400
-        )
+        ).interactive()  # Zoom/Pan am Handy verbessern
 
-        # Medikamentenänderungen als Marker
+        # Medikamentenänderungen als Marker (nur im Zeitraum anzeigen)
         if not st.session_state["medikamente"].empty:
-            med_df = st.session_state["medikamente"]
-            med_markierungen = alt.Chart(med_df).mark_rule(color="red").encode(
-                x="Datum:T",
-                tooltip=["Datum:T", "Kommentar:N"]
-            )
+            med_df = st.session_state["medikamente"].copy()
+            med_df["Datum"] = pd.to_datetime(med_df["Datum"])
+            med_df = med_df[(med_df["Datum"] >= pd.to_datetime(bereich[0])) & (med_df["Datum"] <= pd.to_datetime(bereich[1]))]
 
-            med_labels = alt.Chart(med_df).mark_text(
-                align='left', baseline='bottom', dx=5, dy=-5, color="red"
-            ).encode(
-                x="Datum:T",
-                y=alt.value(10),
-                text="Kommentar:N"
-            )
+            if not med_df.empty:
+                med_markierungen = alt.Chart(med_df).mark_rule(color="red").encode(
+                    x="Datum:T",
+                    tooltip=["Datum:T", "Kommentar:N"]
+                )
 
-            chart = chart + med_markierungen + med_labels
+                med_labels = alt.Chart(med_df).mark_text(
+                    align='left', baseline='bottom', dx=5, dy=-5, color="red"
+                ).encode(
+                    x="Datum:T",
+                    y=alt.value(10),
+                    text="Kommentar:N"
+                )
+
+                chart = chart + med_markierungen + med_labels
 
         st.altair_chart(chart, use_container_width=True)
 
