@@ -6,7 +6,7 @@ import os
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Tägliche Bewertung", layout="centered")
+st.set_page_config(page_title="Tägliche Bewertung", layout="wide")
 
 st.title("📊 Tägliche Bewertung (1–10)")
 st.write("Trage deine Daten ein und analysiere deinen Verlauf.")
@@ -118,8 +118,7 @@ if not st.session_state["daten"].empty:
             color=alt.Color("Kategorie:N", scale=alt.Scale(scheme="category10")),
             tooltip=["Datum:T", "Kategorie:N", "Wert:Q"]
         ).properties(
-            width="container",
-            height=400
+            width="container"
         )
 
         if not st.session_state["medikamente"].empty:
