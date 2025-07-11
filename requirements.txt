@@ -4,3 +4,4 @@ altair
 matplotlib
 seaborn
 fpdf
+plotly
